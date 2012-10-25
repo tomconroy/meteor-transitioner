@@ -8,9 +8,9 @@ Transitioner = function() {
 }
 Transitioner._transition_events = 'webkitTransitionEnd.transitioner oTransitionEnd.transitioner transitionEnd.transitioner msTransitionEnd.transitioner transitionend.transitioner';
 Transitioner.prototype = {
-  init: function(Router) {
+  init: function(Router, time) {
     var self = this;
-    
+    self.timeout = time;
     self.current_page.set(Router.current_page())
     Meteor.deps.await(function () { return Router.current_page() !== self.current_page(true) }, function() {
       self.transition_to(Router.current_page());
@@ -32,12 +32,10 @@ Transitioner.prototype = {
     self.next_page.set(new_page)
     Meteor.defer(function() {
       // we want to wait until the TE event has fired for both containers
-      $('body')
-        .addClass(self._transition_classes())
-        .on(Transitioner._transition_events, function (e) {
-          if ($(e.target).is('body'))
-            self.transition_end();
-        });
+      $('body').addClass(self._transition_classes());
+			setTimeout(function(){
+				self.transition_end();
+			}, self.timeout);
     });
   },
   
